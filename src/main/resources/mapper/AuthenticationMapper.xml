@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.AuthenticationMapper">
+	<!-- 新增实名认证-->
+	<insert id="addAuthentication" parameterType="com.lzs.model.Authentication">
+	  insert into t_xcx_authentication
+				(uuid,
+                user_id,
+                resident_id,
+                name,
+                card_number,
+                create_time
+				)
+		values  (
+				#{uuid},
+                #{user_id,jdbcType=VARCHAR},
+                #{resident_id,jdbcType=VARCHAR},
+                #{name,jdbcType=VARCHAR},
+                #{card_number,jdbcType=VARCHAR},
+                now()
+				) 
+	</insert>
+</mapper>

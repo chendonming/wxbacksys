@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.ResidentMapper">
+	<resultMap id="residentMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+		<result column="card_number" property="card_number" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="flag" property="flag" jdbcType="INTEGER" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="commonReturnSql">
+		uuid,name,phone,card_number,sex,flag,create_time,update_time
+	</sql>
+	
+	<!-- 根据姓名和身份证查询居民 -->
+	<select id="queryResidentByNameAndCard" parameterType="Map" resultType="com.lzs.model.Resident">
+		select <include refid="commonReturnSql"/>
+		    from t_xcx_resident
+		<where> 
+			flag = 1 
+			<if test="name !=null and name !=''">
+				and name=#{name}   
+			</if>
+			<if test="card_number !=null and card_number !=''">
+				and card_number=#{card_number}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 新增居民用户 -->
+	<insert id="addResident" parameterType="com.lzs.model.Resident">
+		insert into 
+		   t_xcx_resident( 
+		    uuid,
+		    name,
+		    phone,
+		    card_number,
+		    sex,
+		    flag,
+		    create_time,
+		    update_time
+		)values(
+			#{uuid},
+			#{name,jdbcType=VARCHAR},
+			#{phone,jdbcType=VARCHAR},
+			#{card_number,jdbcType=VARCHAR},
+			#{sex,jdbcType=INTEGER},
+			1,
+			now(),
+			now()
+		)
+	</insert>
+	
+	<!-- 查询居民用户列表 -->
+	<select id="queryResidentList" parameterType="Map" resultMap="residentMap">
+		select <include refid="commonReturnSql"/>
+		   from t_xcx_resident
+		   where flag = 1
+		   <if test="name !=null and name !=''">
+		   		and name  LIKE CONCAT('%',#{name},'%')
+		   </if>
+		   <if test="phone !=null and phone !=''">
+		   		and phone  LIKE CONCAT('%',#{phone},'%')
+		   </if>
+		    <if test="card_number !=null and  card_number !=''">
+		   		and card_number  LIKE CONCAT('%',#{card_number},'%')
+		   </if>
+		    <if test="sex !=null">
+		   		and sex = #{sex}
+		   </if>
+	</select>
+	
+	<!-- 根据居民姓名和身份证进行修改 -->
+	<update id="updateResidentByNameAndCard" parameterType="com.lzs.model.Resident">
+		 update t_xcx_resident set name=#{name}, flag =#{flag}, sex = #{sex},phone=#{phone},update_time=now() where card_number=#{card_number}
+	</update>
+	
+	<!-- 查询单个居民信息 -->
+	<select id="queryResident" parameterType="String" resultMap="residentMap">
+		 select <include refid="commonReturnSql"/>
+		   from t_xcx_resident
+		  where uuid = #{uuid} 
+	</select>
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.MessageMapper">
+	<resultMap id="messageMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="user_id" property="user_id" jdbcType="VARCHAR" />
+		<result column="flag" property="flag" jdbcType="INTEGER" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="commonReturnSql">
+		uuid,title,content,user_id,flag,create_time,update_time
+	</sql>
+	
+	<!-- 添加消息 -->
+	<insert id="addMessage" parameterType="com.lzs.model.Message">
+	insert into t_xcx_message
+				(uuid,
+                title,
+                content,
+                user_id,
+                flag,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+                #{title,jdbcType=VARCHAR},
+                #{content,jdbcType=VARCHAR},
+                #{user_id,jdbcType=VARCHAR},
+                1,
+                now(),
+                now()
+				) 
+	</insert>
+	
+	<!--查询消息列表 -->
+	<select id="queryMessageListByParam" parameterType="Map" resultMap="messageMap">
+		select <include refid="commonReturnSql"/>
+		 from t_xcx_message
+		where user_id = #{user_id}
+		order by flag desc,create_time desc
+	</select>
+	
+	<!-- 查询消息详情 -->
+	<select id="queryMessage" parameterType="String" resultMap="messageMap">
+		select <include refid="commonReturnSql"/>
+		 from t_xcx_message
+		 where uuid=#{uuid}
+	</select>
+	
+	<!-- 修改消息状态 -->
+	<update id="updateMessageFlag" parameterType="Map">
+		update t_xcx_message set flag=#{flag},update_time=now() where uuid=#{uuid}
+	</update>
+</mapper>

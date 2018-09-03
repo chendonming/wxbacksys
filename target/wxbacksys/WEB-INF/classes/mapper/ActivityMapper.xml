@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.ActivityMapper">
+	<resultMap id="activityMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="cover" property="cover" jdbcType="VARCHAR" />
+		<result column="activity_starttime" property="activity_starttime" jdbcType="TIMESTAMP" />
+		<result column="activity_endtime" property="activity_endtime" jdbcType="TIMESTAMP" />
+		<result column="sign_starttime" property="sign_starttime" jdbcType="DATE" />
+		<result column="sign_endtime" property="sign_endtime" jdbcType="DATE" />
+		<result column="limit_people" property="limit_people" jdbcType="INTEGER" />
+		<result column="activity_place" property="activity_place" jdbcType="VARCHAR" />
+		<result column="activity_detail" property="activity_detail" jdbcType="VARCHAR" />
+		<result column="volunteer_team_id" property="volunteer_team_id" jdbcType="VARCHAR" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="commonReturnSql">
+		uuid,name,cover,activity_starttime,activity_endtime,sign_starttime,sign_endtime,limit_people,activity_place,
+		activity_detail,volunteer_team_id,create_time,update_time
+	</sql>
+	
+	<!-- 发布活动 -->
+	<insert id="addActivity" parameterType="com.lzs.model.Activity">
+	insert into t_xcx_activity
+				(uuid,
+                name,
+                cover,
+                activity_starttime,
+                activity_endtime,
+                sign_starttime,
+                sign_endtime,
+                limit_people,
+                activity_place,
+                activity_detail,
+                volunteer_team_id,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+                #{name,jdbcType=VARCHAR},
+                #{cover,jdbcType=VARCHAR},
+                #{activity_starttime,jdbcType=TIMESTAMP},
+                #{activity_endtime,jdbcType=TIMESTAMP},
+                #{sign_starttime,jdbcType=TIMESTAMP},
+                #{sign_endtime,jdbcType=TIMESTAMP},
+                #{limit_people,jdbcType=INTEGER},
+                #{activity_place,jdbcType=VARCHAR},
+                #{activity_detail,jdbcType=VARCHAR},
+                #{volunteer_team_id,jdbcType=VARCHAR},
+                now(),
+                now()
+				) 
+	</insert>
+	
+	<!--查询活动列表 -->
+	<select id="queryActivityListByParam" parameterType="Map" resultMap="activityMap">
+		select uuid,name,activity_starttime,activity_endtime,activity_place
+		 from t_xcx_activity
+		where volunteer_team_id = #{volunteer_team_id}
+		order by create_time desc
+	</select>
+	
+	<!-- 查询活动详情 -->
+	<select id="queryActivity" parameterType="String" resultMap="activityMap">
+		select <include refid="commonReturnSql"/>
+		 from t_xcx_activity
+		 where uuid=#{uuid}
+	</select>
+	
+	<!-- 删除活动 -->
+	<update id="deleteActivity" parameterType="String">
+	 delete from t_xcx_activity where uuid=#{uuid}
+	</update>
+	
+	<!-- 修改活动 -->
+	<update id="updateActivity" parameterType="com.lzs.model.Activity">
+	  update t_xcx_activity
+	  	<set>
+	  	<if test="name != null">
+			name = #{name},
+		</if>
+		<if test="cover != null">
+			cover = #{cover},
+		</if>
+		<if test="activity_starttime != null">
+			activity_starttime = #{activity_starttime},
+		</if>
+		<if test="activity_endtime != null">
+			activity_endtime = #{activity_endtime},
+		</if>
+		<if test="sign_starttime != null">
+			sign_starttime = #{sign_starttime},
+		</if>
+		<if test="sign_endtime != null">
+			sign_endtime = #{sign_endtime},
+		</if>
+		<if test="limit_people != null">
+			limit_people = #{limit_people},
+		</if>
+		<if test="activity_place != null">
+			activity_place = #{activity_place},
+		</if>
+		<if test="activity_detail != null">
+			activity_detail = #{activity_detail},
+		</if>
+		<if test="volunteer_team_id != null">
+			volunteer_team_id = #{volunteer_team_id},
+		</if>
+	  		update_time = now()
+	  	</set>
+	  	where uuid=#{uuid}
+	</update>
+	
+	<!-- 我参与的活动 -->
+	<select id="queryActivityForMyself" parameterType="String" resultMap="activityMap">
+		select ac.uuid,ac.name,ac.activity_starttime,ac.activity_endtime,ac.activity_place
+		   from t_xcx_activity ac,t_xcx_activity_registration ar
+		where ac.uuid = ar.activity_id and ar.user_id = #{user_id} 
+		order by ac.create_time desc
+	</select>
+	
+	<!-- 活动管理列表 -->
+	<select id="queryActivityForManager" parameterType="String" resultMap="activityMap">
+		select ac.*
+		from t_xcx_activity ac left join t_xcx_vteam_user au on ac.volunteer_team_id = au.volunteer_team_id
+		<if test="volunteer_team_id != null and volunteer_team_id != ''">
+			where ac.volunteer_team_id = #{volunteer_team_id}
+		</if>
+	</select>
+</mapper>

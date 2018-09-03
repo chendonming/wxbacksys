@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.HotlineMapper">
+	<resultMap id="hotlineMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!--查询热线 -->
+	<select id="queryHotline"  resultMap="hotlineMap">
+		select uuid,phone
+		 from t_xcx_hotline
+	</select>
+	
+	<!-- 修改活动热线 -->
+	<update id="updateHotline" parameterType="Map">
+		update t_xcx_hotline set phone=#{phone} where uuid=#{uuid}
+	</update>
+	
+</mapper>

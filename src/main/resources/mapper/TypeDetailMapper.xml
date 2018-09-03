@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.TypeDetailMapper">
+	<resultMap id="typeDetailMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="type_id" property="type_id" jdbcType="VARCHAR" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="commonReturnSql">
+		uuid,name,type_id,create_time,update_time
+	</sql>
+	
+	<!-- 新增类型明细 -->
+	<insert id="addTypeDetail" parameterType="com.lzs.model.TypeDetail">
+	  insert into t_xcx_type_detail
+				(uuid,
+                name,
+                type_id,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+                #{name,jdbcType=VARCHAR},
+                #{type_id,jdbcType=VARCHAR},
+                now(),
+                now()
+				) 
+	</insert>
+	
+	<!-- 查询类型明细 -->
+	<select id="queryTypeDetail" parameterType="String" resultMap="typeDetailMap">
+		select <include refid="commonReturnSql"/>
+		 from t_xcx_type_detail
+		where
+			uuid = #{uuid}
+			order by create_time asc
+	</select>
+	
+	<!-- 查询明细列表 -->
+	<select id="queryTypeDetailByParam" parameterType="Map" resultMap="typeDetailMap">
+		select <include refid="commonReturnSql"/>
+		 from t_xcx_type_detail
+		where
+			type_id = #{type_id}
+			order by create_time asc
+	</select>
+	
+	<!-- 修改类型明细 -->
+	<update id="updateTypeDetail" parameterType="com.lzs.model.TypeDetail">
+	update t_xcx_type_detail 
+	<set>
+		<if test="name != null">
+			name = #{name},
+		</if>
+		update_time =now()
+	</set>
+	where uuid=#{uuid}
+	</update>
+	
+	<!-- 删除类型明细 -->
+	<update id="deleteTypeDetail" parameterType="String">
+	 delete from t_xcx_type_detail where uuid=#{uuid}
+	</update>
+	
+	<!-- 根据类型编码查询类型明细 -->
+	<select id="queryTypeDetailByTypeCode" parameterType="String" resultMap="typeDetailMap">
+		select td.uuid,td.name
+		    from t_xcx_type_detail td ,t_xcx_type t
+		 where t.code=#{code} and t.uuid = td.type_id and t.flag = 1    
+	</select>
+</mapper>

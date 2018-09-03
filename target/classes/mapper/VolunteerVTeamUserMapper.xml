@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.VTeamUserMapper">
+	<resultMap id="vTeamUserMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="volunteer_team_id" property="volunteer_team_id" jdbcType="VARCHAR" />
+		<result column="user_id" property="user_id" jdbcType="VARCHAR" />
+		<result column="flag" property="flag" jdbcType="INTEGER" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+		<result column="nick_name" property="nick_name" jdbcType="VARCHAR"/>
+		<result column="phone" property="phone" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="commonReturnSql">
+		uuid,volunteer_team_id,user_id,flag,create_time,update_time
+	</sql>
+	
+	<!-- 设置成为团队管理员 -->
+	<insert id="addVTeamUser" parameterType="com.lzs.model.VTeamUser">
+		insert into t_xcx_vteam_user
+				(uuid,
+                volunteer_team_id,
+                user_id,
+                flag,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+                #{volunteer_team_id,jdbcType=VARCHAR},
+                #{user_id,jdbcType=VARCHAR},
+                1,
+                now(),
+                now()
+				) 
+	</insert>
+	
+	<!-- 根据团队和用户查询团队管理员 -->
+	<select id="queryVTeamUserByUserAndTeam" parameterType="Map" resultMap="vTeamUserMap">
+		select <include refid="commonReturnSql"/>
+		  from t_xcx_vteam_user
+		  where volunteer_team_id= #{volunteer_team_id} and user_id=#{user_id} and flag = 1
+	</select>
+	
+	<!-- 删除志愿者团队管理员 -->
+	<update id="deleteVTeamUser" parameterType="Map">
+		update t_xcx_vteam_user set flag = 2,update_time=now() 
+		  where volunteer_team_id= #{volunteer_team_id} 
+		  and user_id=#{user_id}
+	</update>
+	
+	<!-- 根据用户id查询管理关系 -->
+	<select id="queryVTeamUserListByUser" parameterType="String" resultMap="vTeamUserMap">
+		select <include refid="commonReturnSql"/>
+		  from t_xcx_vteam_user
+		  where  user_id=#{user_id} and flag = 1
+	</select>
+	
+	<!-- 根据志愿者团队查询管理员 -->
+	<select id="queryVTeamUserList" parameterType="String" resultMap="vTeamUserMap">
+		select tt.*, tu.nick_name as nick_name,tu.phone as phone
+		  from t_xcx_vteam_user tt left join t_xcx_user tu on tt.user_id = tu.uuid
+		  where  tt.volunteer_team_id=#{volunteer_team_id} and tt.flag=1
+	</select>
+</mapper>

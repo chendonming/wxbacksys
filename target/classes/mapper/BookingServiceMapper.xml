@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.BookingServiceMapper">
+	<resultMap id="bookingServiceMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="type_name" property="type_name" jdbcType="VARCHAR" />
+		<result column="book_type" property="book_type" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="booking_time" property="booking_time" jdbcType="TIMESTAMP" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="user_id" property="user_id" jdbcType="VARCHAR" />
+		<result column="user_name" property="user_name" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="commonReturnSql">
+		uuid,type,book_type,address,booking_time,phone,remark,user_id,status,create_time,update_time,
+		(select name from t_xcx_type_detail d where d.uuid = type) type_name,
+		(select real_name from t_xcx_user u where u.uuid = user_id) user_name
+	</sql>
+	
+	<!-- 新增预约服务 -->
+	<insert id="addBookingService" parameterType="com.lzs.model.BookingService">
+	insert into t_xcx_booking_service
+				(uuid,
+                type,
+                book_type,
+                address,
+                booking_time,
+                phone,
+                remark,
+                user_id,
+                status,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+                #{type,jdbcType=VARCHAR},
+                #{book_type,jdbcType=VARCHAR},
+                #{address,jdbcType=VARCHAR},
+                #{booking_time,jdbcType=TIMESTAMP},
+                #{phone,jdbcType=VARCHAR},
+                #{remark,jdbcType=VARCHAR},
+                #{user_id,jdbcType=VARCHAR},
+                1,
+                now(),
+                now()
+				) 
+	</insert>
+	
+	
+	<!-- 查询预约服务列表 -->
+	<select id="queryBookingServiceListByParam" parameterType="Map" resultMap="bookingServiceMap">
+		select <include refid="commonReturnSql"/>
+		   from t_xcx_booking_service
+		 <where>
+		 	1=1
+		 	<if test="type!= null">
+				and type = #{type}
+			</if>
+			<if test="user_id != null">
+				and user_id = #{user_id}
+			</if>
+			<if test="status != null">
+				and status = #{status}
+			</if>
+			<if test="types!= null">
+				and type in
+				<foreach collection="types" item="type" index="index" open="(" separator="," close=")">#{type}</foreach>
+			</if>
+		 </where>
+		 order by status desc,create_time desc
+	</select>
+	
+	<!-- 查询预约详情 -->
+	<select id="queryBookingService" parameterType="Map" resultMap="bookingServiceMap">
+		select <include refid="commonReturnSql"/>
+		    from t_xcx_booking_service
+		 where uuid = #{uuid}   
+	</select>
+	
+	<!-- 修改预约状态 -->
+	<update id="updateBookingServiceStatus" parameterType="Map">
+		update t_xcx_booking_service set status = #{status},update_time=now() where uuid=#{uuid}
+	</update>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.EvaluateMapper">
+	<resultMap id="evaluateMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="star_level" property="star_level" jdbcType="INTEGER" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="user_id" property="user_id" jdbcType="VARCHAR" />
+		<result column="user_name" property="user_name" jdbcType="VARCHAR" />
+		<result column="volunteer_team_id" property="volunteer_team_id" jdbcType="VARCHAR" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="commonReturnSql">
+		uuid,star_level,content,user_id,(select nick_name from t_xcx_user where uuid =user_id) user_name,
+		volunteer_team_id,create_time,update_time
+	</sql>
+	
+	<!-- 发布评价 -->
+	<insert id="addEvaluate" parameterType="com.lzs.model.Evaluate">
+	insert into t_xcx_vteam_evaluate
+				(uuid,
+                star_level,
+                content,
+                user_id,
+                volunteer_team_id,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+                #{star_level,jdbcType=INTEGER},
+                #{content,jdbcType=VARCHAR},
+                #{user_id,jdbcType=VARCHAR},
+                #{volunteer_team_id,jdbcType=VARCHAR},
+                now(),
+                now()
+				) 
+	</insert>
+	
+	<!-- 查询评价列表 -->
+	<select id="queryEvaluateListByParam" parameterType="Map" resultMap="evaluateMap">
+		select <include refid="commonReturnSql"/>
+		  from t_xcx_vteam_evaluate
+		 where  volunteer_team_id = #{volunteer_team_id}
+		 order by create_time desc
+	</select>
+	
+	<!-- 查询评价详情 -->
+	<select id="queryEvaluate" parameterType="String" resultMap="evaluateMap">
+	   select <include refid="commonReturnSql"/>
+	     from t_xcx_vteam_evaluate
+	    where uuid = #{uuid} 
+	</select>
+	
+	<resultMap id="returnMap" type="hashMap">
+		<result column="star_levels" property="star_levels" jdbcType="INTEGER" />
+		<result column="number" property="number" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<!-- 统计团队星数 -->
+	<select id="queryStarNumberByTeam" parameterType="String" resultMap="returnMap">
+		select sum(star_level) star_levels,count(star_level) number
+		  from t_xcx_vteam_evaluate
+		where   volunteer_team_id = #{volunteer_team_id}
+	</select>
+</mapper>

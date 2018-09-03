@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.ActivityRegistrationMapper">
+	<resultMap id="activityRegistrationMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="activity_id" property="activity_id" jdbcType="VARCHAR" />
+		<result column="user_id" property="user_id" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+		<result column="age" property="age" jdbcType="INTEGER" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="people_number" property="people_number" jdbcType="INTEGER" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="commonReturnSql">
+		uuid,activity_id,user_id,name,age,address,people_number,phone,create_time
+	</sql>
+	
+	<!-- 活动报名-->
+	<insert id="addActivityRegistration" parameterType="com.lzs.model.ActivityRegistration">
+	insert into t_xcx_activity_registration
+				(uuid,
+                activity_id,
+                user_id,
+                name,
+                age,
+                address,
+                phone,
+                people_number,
+                create_time
+				)
+		values  (
+				#{uuid},
+                #{activity_id,jdbcType=VARCHAR},
+                #{user_id,jdbcType=VARCHAR},
+                #{name,jdbcType=VARCHAR},
+                #{age,jdbcType=INTEGER},
+                #{address,jdbcType=VARCHAR},
+                #{phone,jdbcType=VARCHAR},
+                #{people_number,jdbcType=INTEGER},
+                now()
+				) 
+	</insert>
+	
+	<!-- 查询活动报名总人数 -->
+	<select id="queryActivityRegistrationTotalPeople" parameterType="String" resultType="Integer">
+		select sum(people_number)
+		    from t_xcx_activity_registration
+		where activity_id =#{activity_id}
+	</select>
+	
+	<!-- 活动报名名称列表 -->
+	<select id="queryActivityRegistrationList" parameterType="String" resultMap="activityRegistrationMap">
+		 select uuid,name
+		    from t_xcx_activity_registration
+		 where activity_id =#{activity_id}
+	</select>
+	
+	
+	<!-- 查看报名用户的详情 -->
+	<select id="queryActivityRegistration" parameterType="String" resultMap="activityRegistrationMap">
+		select <include refid="commonReturnSql"/>
+		   from t_xcx_activity_registration
+		 where uuid=#{uuid}
+	</select>
+</mapper>

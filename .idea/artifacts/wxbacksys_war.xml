@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="wxbacksys:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="wxbacksys.war">
+      <element id="artifact" artifact-name="wxbacksys:war exploded" />
+    </root>
+  </artifact>
+</component>

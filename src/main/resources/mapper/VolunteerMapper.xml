@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.VolunteerMapper">
+	<resultMap id="volunteerMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="user_id" property="user_id" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="birthday" property="birthday" jdbcType="VARCHAR" />
+		<result column="educational_level" property="educational_level" jdbcType="INTEGER" />
+		<result column="identity" property="identity" jdbcType="INTEGER" />
+		<result column="school_name" property="school_name" jdbcType="VARCHAR" />
+		<result column="major_class" property="major_class" jdbcType="VARCHAR" />
+		<result column="industry" property="industry" jdbcType="VARCHAR" />
+		<result column="is_duty" property="is_duty" jdbcType="INTEGER" />
+		<result column="service_time" property="service_time" jdbcType="INTEGER" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+		<result column="domicile" property="domicile" jdbcType="VARCHAR" />
+		<result column="stauts" property="stauts" jdbcType="INTEGER" />
+		<result column="volunteer_team_id" property="volunteer_team_id" jdbcType="VARCHAR" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<!-- 新增志愿者 -->
+	<insert id="addVolunteer" parameterType="com.lzs.model.Volunteer">
+	  insert into t_xcx_volunteer
+				(uuid,
+				user_id,
+                name,
+                sex,
+                birthday,
+                educational_level,
+                identity,
+                school_name,
+                major_class,
+                industry,
+                is_duty,
+                service_time,
+                phone,
+                domicile,
+                stauts,
+                volunteer_team_id,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+				#{user_id,jdbcType=VARCHAR},
+                #{name,jdbcType=VARCHAR},
+                #{sex,jdbcType=INTEGER},
+                #{birthday,jdbcType=VARCHAR},
+                #{educational_level,jdbcType=INTEGER},
+                #{identity,jdbcType=VARCHAR},
+                #{school_name,jdbcType=VARCHAR},
+                #{major_class,jdbcType=VARCHAR},
+                #{industry,jdbcType=VARCHAR},
+                #{is_duty,jdbcType=INTEGER},
+                #{service_time,jdbcType=INTEGER},
+                #{phone,jdbcType=VARCHAR},
+                #{domicile,jdbcType=VARCHAR},
+                #{stauts,jdbcType=INTEGER},
+                #{volunteer_team_id,jdbcType=VARCHAR},
+                now(),
+                now()
+				) 
+	</insert>
+	
+	<!-- 查询是否已申请过志愿者 -->
+	<select id="queryVolunteerCount" parameterType="Map" resultType="Integer">
+		select count(*)
+		   from t_xcx_volunteer
+		where volunteer_team_id = #{volunteer_team_id} and user_id = #{user_id}
+		 and stauts != 5
+	</select>
+	
+	<!-- 志愿者列表查询 -->
+	<select id="queryVolunteerListByParam" parameterType="Map" resultMap="volunteerMap">
+		select uuid,user_id,name,create_time,stauts
+		    from t_xcx_volunteer
+		<where>
+		    1=1
+			<if test="volunteer_team_id != null">
+				and volunteer_team_id = #{volunteer_team_id}
+			</if>
+			<if test="stautss != null and stautss!=''">
+					and stauts in
+					<foreach collection="stautss" item="stauts" index="index" open="(" separator="," close=")">#{stauts}</foreach>
+			</if>
+			order by create_time desc 
+		</where>    
+	</select>
+	
+	<!-- 查询志愿者详情 -->
+	<select id="queryVolunteer" parameterType="String" resultMap="volunteerMap">
+		 select uuid,user_id,name,sex,birthday,educational_level,identity,school_name,major_class,industry,is_duty,
+		 service_time,phone,domicile,stauts,volunteer_team_id,create_time,update_time
+		    from t_xcx_volunteer
+		 where uuid = #{uuid}   
+	</select>
+	
+	<!-- 修改志愿者状态 -->
+	<update id="updateVolunteerStauts" parameterType="Map">
+	 	update t_xcx_volunteer set stauts = #{stauts},update_time = now() where uuid = #{uuid}
+	</update>
+</mapper>

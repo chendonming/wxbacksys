@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.UserMapper">
+	<resultMap id="userMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="nick_name" property="nick_name" jdbcType="VARCHAR" />
+		<result column="real_name" property="real_name" jdbcType="VARCHAR" />
+		<result column="head_url" property="head_url" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+		<result column="card_number" property="card_number" jdbcType="VARCHAR" />
+		<result column="birthday" property="birthday" jdbcType="VARCHAR" />
+		<result column="domicile" property="domicile" jdbcType="VARCHAR" />
+		<result column="vocation" property="vocation" jdbcType="VARCHAR" />
+		<result column="industry" property="industry" jdbcType="VARCHAR" />
+		<result column="openid" property="openid" jdbcType="VARCHAR" />
+		<result column="appid" property="appid" jdbcType="VARCHAR" />
+		<result column="role" property="role" jdbcType="INTEGER" />
+		<result column="is_authentication" property="is_authentication" jdbcType="INTEGER" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="commonReturnSql">
+		uuid,nick_name,real_name,head_url,sex,phone,card_number,birthday,domicile,vocation,industry,openid,appid,role,is_authentication,create_time,update_time
+	</sql>
+	
+	<!-- 新增用户 -->
+	<insert id="addUser" parameterType="com.lzs.model.User">
+	  insert into t_xcx_user
+				(uuid,
+                nick_name,
+                real_name,
+                head_url,
+                sex,
+                phone,
+                card_number,
+                birthday,
+                domicile,
+                vocation,
+                industry,
+                openid,
+                appid,
+                role,
+                is_authentication,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+                #{nick_name,jdbcType=VARCHAR},
+                #{real_name,jdbcType=VARCHAR},
+                #{head_url,jdbcType=VARCHAR},
+                #{sex,jdbcType=INTEGER},
+                #{phone,jdbcType=VARCHAR},
+                #{card_number,jdbcType=VARCHAR},
+                #{birthday,jdbcType=VARCHAR},
+                #{domicile,jdbcType=VARCHAR},
+                #{vocation,jdbcType=VARCHAR},
+                #{industry,jdbcType=VARCHAR},
+                #{openid,jdbcType=VARCHAR},
+                #{appid,jdbcType=VARCHAR},
+                1,
+                2,
+                now(),
+                now()
+				) 
+	</insert>
+	
+	<!-- 查询用户列表 -->
+	<select id="queryUserList" parameterType="Map" resultMap="userMap">
+		select uuid,nick_name,real_name,phone,sex,card_number,birthday,role,is_authentication
+		 from t_xcx_user
+		<where>
+			1=1
+			<if test="nick_name != null">
+				and nick_name LIKE CONCAT('%',#{nick_name},'%')
+			</if>
+			<if test="real_name != null">
+				and real_name  LIKE CONCAT('%',#{real_name},'%')
+			</if>
+			<if test="phone != null">
+				and phone  LIKE CONCAT('%',#{phone},'%')
+			</if>
+			<if test="card_number != null">
+				and card_number  LIKE CONCAT('%',#{card_number},'%')
+			</if>
+			<if test="sex != null">
+				and sex = #{sex}
+			</if>
+			<if test="role != null">
+				and role = #{role}
+			</if>
+			<if test="is_authentication != null">
+				and is_authentication = #{is_authentication}
+			</if>
+			order by role desc,create_time desc
+		</where>
+	</select>
+	
+	<!-- 查询用户详情 -->
+	<select id="queryUser" parameterType="String" resultMap="userMap">
+		select <include refid="commonReturnSql"/>
+		   from t_xcx_user
+		 where uuid=#{uuid}  
+	</select>
+	
+	<!-- 修改用户详情 -->
+	<update id="updateUser" parameterType="com.lzs.model.User">
+	update t_xcx_user 
+	<set>
+		<if test="nick_name != null">
+			nick_name = #{nick_name},
+		</if>
+		<if test="real_name != null">
+			real_name = #{real_name},
+		</if>
+		<if test="head_url != null">
+			head_url = #{head_url},
+		</if>
+		<if test="sex != null">
+			sex = #{sex},
+		</if>
+		<if test="phone != null">
+			phone = #{phone},
+		</if>
+		<if test="card_number != null">
+			card_number = #{card_number},
+		</if>
+		<if test="birthday != null">
+			birthday = #{birthday},
+		</if>
+		<if test="domicile != null">
+			domicile = #{domicile},
+		</if>
+		<if test="vocation != null">
+			vocation = #{vocation},
+		</if>
+		<if test="industry != null">
+			industry = #{industry},
+		</if>
+		<if test="role != null">
+			role = #{role},
+		</if>
+		<if test="is_authentication != null">
+			is_authentication = #{is_authentication},
+		</if>
+		update_time =now()
+	</set>
+	where uuid=#{uuid}
+	</update>
+	
+	<!-- 查询用户详情 -->
+	<select id="queryUserToUser" parameterType="String" resultType="com.lzs.model.User">
+		select <include refid="commonReturnSql"/>
+		   from t_xcx_user
+		 where uuid=#{uuid}  
+	</select>
+	
+	<!-- 查询用户详情根据openid -->
+	<select id="queryUserByOpenid" parameterType="String" resultMap="userMap">
+		select <include refid="commonReturnSql"/>
+		   from t_xcx_user
+		 where openid=#{openid}  
+	</select>
+	
+	<!-- 根据openid和用户名查询用户 -->
+	<select id="queryUserByOpenidAndName" parameterType="Map" resultMap="userMap">
+		select <include refid="commonReturnSql"/>
+		 from t_xcx_user
+		 where openid=#{openid} and nick_name = #{nick_name} and role =3
+	</select>
+</mapper>

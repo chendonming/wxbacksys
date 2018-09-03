@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzs.dao.VolunteerTeamMapper">
+	<resultMap id="volunteerTeamMap" type="hashMap">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="type_name" property="type_name" jdbcType="VARCHAR" />
+		<result column="service_type" property="service_type" jdbcType="VARCHAR" />
+		<result column="recruit_starttime" property="recruit_starttime" jdbcType="DATE" />
+		<result column="recruit_endtime" property="recruit_endtime" jdbcType="DATE" />
+		<result column="service_time" property="service_time" jdbcType="VARCHAR" />
+		<result column="join_type" property="join_type" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<resultMap id="volunteerTeamMap1" type="com.lzs.model.VolunteerTeam">
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="type_name" property="type_name" jdbcType="VARCHAR" />
+		<result column="service_type" property="service_type" jdbcType="VARCHAR" />
+		<result column="recruit_starttime" property="recruit_starttime" jdbcType="DATE" />
+		<result column="recruit_endtime" property="recruit_endtime" jdbcType="DATE" />
+		<result column="service_time" property="service_time" jdbcType="VARCHAR" />
+		<result column="join_type" property="join_type" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+			<collection property="pictureList" ofType="com.lzs.model.VolunteerTeamPicture">
+				<result column="picture_uuid" property="uuid" jdbcType="VARCHAR" />
+				<result column="picture_name" property="name" jdbcType="VARCHAR" />
+				<result column="picture_url" property="url" jdbcType="VARCHAR" />
+			</collection>
+	</resultMap>
+
+	<!-- 新增志愿者团队 -->
+	<insert id="addVolunteerTeam" parameterType="com.lzs.model.VolunteerTeam">
+	  insert into t_xcx_volunteer_team
+				(uuid,
+				name,
+                type,
+                service_type,
+                recruit_starttime,
+                recruit_endtime,
+                service_time,
+                join_type,
+                introduction,
+                create_time,
+                update_time
+				)
+		values  (
+				#{uuid},
+				#{name,jdbcType=VARCHAR},
+                #{type,jdbcType=VARCHAR},
+                #{service_type,jdbcType=VARCHAR},
+                #{recruit_starttime,jdbcType=DATE},
+                #{recruit_endtime,jdbcType=DATE},
+                #{service_time,jdbcType=VARCHAR},
+                #{join_type,jdbcType=VARCHAR},
+                #{introduction,jdbcType=VARCHAR},
+                now(),
+                now()
+				) 
+	</insert>
+	
+	<!-- 查询志愿者团队列表 -->
+	<select id="queryVolunteerTeamList" parameterType="Map" resultMap="volunteerTeamMap">
+		select uuid,name,type,(select name from t_xcx_type_detail where uuid = type) type_name,create_time
+		 from t_xcx_volunteer_team
+		<where>
+			1=1
+			<if test="name != null">
+				and name LIKE CONCAT('%',#{name},'%')
+			</if>
+			<if test="type != null">
+				and type = #{type}
+			</if>
+			order by create_time desc
+		</where>
+	</select>
+	
+	<!-- 查询志愿者团队详情 -->
+	<select id="queryVolunteerTeam" parameterType="String" resultMap="volunteerTeamMap1">
+		select t.uuid,t.name,t.type,(select name from t_xcx_type_detail where uuid = t.type) type_name,
+		t.recruit_starttime,t.recruit_endtime,t.service_time,t.join_type,t.introduction,t.create_time,t.update_time,
+		   p.uuid picture_uuid, p.name picture_name,p.url picture_url
+		   from t_xcx_volunteer_team t left join t_xcx_vteam_picture p on t.uuid = p.volunteer_team_id
+		 where t.uuid=#{uuid}
+	</select>
+	
+	<!-- 修改志愿者团队详情 -->
+	<update id="updateVolunteerTeam" parameterType="com.lzs.model.VolunteerTeam">
+	update t_xcx_volunteer_team 
+	<set>
+		<if test="name != null">
+			name = #{name},
+		</if>
+		<if test="type != null">
+			type = #{type},
+		</if>
+		<if test="service_type != null">
+			service_type = #{service_type},
+		</if>
+		<if test="recruit_starttime != null">
+			recruit_starttime = #{recruit_starttime},
+		</if>
+		<if test="recruit_endtime != null">
+			recruit_endtime = #{recruit_endtime},
+		</if>
+		<if test="service_time != null">
+			service_time = #{service_time},
+		</if>
+		<if test="join_type != null">
+			join_type = #{join_type},
+		</if>
+		<if test="introduction != null">
+			introduction = #{introduction},
+		</if>
+		update_time =now()
+	</set>
+	where uuid=#{uuid}
+	</update>
+	
+	<!-- 根据用户查询管理团队类型 -->
+	<select id="queryTypeByUser" parameterType="String" resultMap="volunteerTeamMap">
+		SELECT team.type
+			FROM t_xcx_volunteer_team team, t_xcx_vteam_user vu
+	         WHERE  vu.user_id =#{user_id} and vu.flag = 1
+				and vu.volunteer_team_id = team.uuid
+	</select>
+	
+	<!-- 根据类型查询志愿者团队详情 -->
+	<select id="queryVolunteerTeamByType" parameterType="String" resultMap="volunteerTeamMap1">
+		select t.uuid,t.name,t.type,(select name from t_xcx_type_detail where uuid = t.type) type_name,
+		t.recruit_starttime,t.recruit_endtime,t.service_time,t.join_type,t.introduction,t.create_time,t.update_time,
+		   p.uuid picture_uuid, p.name picture_name,p.url picture_url
+		   from t_xcx_volunteer_team t left join t_xcx_vteam_picture p on t.uuid = p.volunteer_team_id
+		 where t.type=#{type}
+	</select>
+	
+	<!-- 查询我的志愿者团队列表 -->
+	<select id="queryVolunteerTeamListForMy" parameterType="String" resultMap="volunteerTeamMap">
+		select t.uuid,t.name,t.type,(select name from t_xcx_type_detail where uuid = t.type) type_name,t.create_time,v.stauts
+		 from t_xcx_volunteer_team t,t_xcx_volunteer v
+		where v.user_id = #{user_id} and v.volunteer_team_id = t.uuid
+			order by create_time desc
+	</select>
+</mapper>
